@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loafer 多 Agent 软件交付平台 - GOAI Agent Infra 初赛方案</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/white.min.css">
+  <style>
+    :root {
+      --r-background-color: #ffffff;
+      --r-main-font: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+      --r-heading-font: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+      --r-main-color: #1f2937;
+      --r-heading-color: #111827;
+      --r-link-color: #2563eb;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+    }
+    .reveal { font-size: 28px; }
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+    .reveal h1 { font-size: 1.8em; }
+    .reveal h2 { font-size: 1.4em; color: var(--accent); }
+    .reveal h3 { font-size: 1.1em; }
+    .reveal ul { line-height: 1.6; }
+    .reveal li { margin-bottom: 0.35em; }
+    .reveal small { font-size: 0.7em; color: #6b7280; }
+    .reveal table {
+      width: 100%;
+      font-size: 0.7em;
+      border-collapse: collapse;
+      margin-top: 0.5em;
+    }
+    .reveal table th, .reveal table td {
+      border: 1px solid #d1d5db;
+      padding: 0.4em 0.6em;
+      text-align: left;
+    }
+    .reveal table th {
+      background: var(--accent-light);
+      font-weight: 700;
+    }
+    .reveal .highlight { color: var(--accent); font-weight: 700; }
+    .reveal .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.1em 0.5em;
+      border-radius: 999px;
+      font-size: 0.6em;
+      vertical-align: middle;
+      margin-right: 0.3em;
+    }
+    .reveal .cover h1 { font-size: 2em; margin-bottom: 0.3em; }
+    .reveal .cover p { color: #4b5563; }
+    .reveal .cover .subtitle { font-size: 1.1em; margin-top: 1em; }
+    .reveal section { text-align: left; }
+    .reveal section.center { text-align: center; }
+    .reveal .footer {
+      position: fixed;
+      bottom: 1em;
+      left: 1em;
+      font-size: 0.5em;
+      color: #9ca3af;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: 封面 -->
+      <section class="center cover">
+        <h1>Loafer 多 Agent 软件交付平台</h1>
+        <p class="subtitle">GOAI 世界人工智能开源大赛 · Agent Infra 赛道</p>
+        <p><span class="tag">选题方向</span>软件研发全流程协同</p>
+        <p><span class="tag">团队</span>[待填写] · 2026-08</p>
+      </section>
+
+      <!-- Slide 2: 问题与场景 -->
+      <section>
+        <h2>问题与场景：企业软件研发的“最后一公里”</h2>
+        <ul>
+          <li>AI 编码助手只能<span class="highlight">补全片段</span>，无法独立完成需求→上线全链路</li>
+          <li>计划、编码、测试、部署、修复跨多个工具与角色，人工切换成本高</li>
+          <li>“<span class="highlight">Demo 可用、生产难用</span>”：缺少自动验证、执行证据与风险边界</li>
+          <li>行业普遍场景：重复业务系统构建、内部工具开发、MVP 快速验证等</li>
+        </ul>
+      </section>
+
+      <!-- Slide 3: 价值主张 -->
+      <section>
+        <h2>价值主张：从一句话需求到可访问 URL</h2>
+        <ul>
+          <li><strong>输入：</strong>自然语言需求（如“做一个带登录的轻量待办应用”）</li>
+          <li><strong>输出：</strong>可直接访问的生产服务 URL</li>
+          <li><strong>中间过程：</strong>计划→模块→任务→代码→测试→修复→部署→验证，全部自动完成</li>
+          <li><strong>人类角色：</strong>设定目标、观察过程、在关键节点确认或兜底</li>
+        </ul>
+      </section>
+
+      <!-- Slide 4: 方案总览 -->
+      <section>
+        <h2>方案总览：基于 AgentTeams 的 Manager-Worker 架构</h2>
+        <ul>
+          <li><span class="highlight">Manager Agent：</span>需求理解、计划生成、任务拆解、编排调度、全局决策</li>
+          <li><span class="highlight">Worker Agents：</span>8 个职能 Agent 各司其职，按依赖串/并行执行</li>
+          <li><span class="highlight">协作空间：</span>数据库状态机 + SSE 实时事件流，过程透明可审计</li>
+          <li><span class="highlight">工具网关：</span>统一 SSH/Git/Nginx/Playwright/Shell 接入，凭证不暴露给 Agent</li>
+          <li><span class="highlight">人类监督：</span>Web UI 实时日志、状态面板、暂停/重跑/手动完成</li>
+        </ul>
+      </section>
+
+      <!-- Slide 5: Agent 身份清单 -->
+      <section>
+        <h2>Agent 身份清单：8 个职能 Agent 覆盖全生命周期</h2>
+        <table>
+          <tr><th>Agent</th><th>核心职责</th></tr>
+          <tr><td>计划生成 Agent</td><td>需求 → 项目级执行计划</td></tr>
+          <tr><td>任务分解 Agent</td><td>计划 → 带依赖的模块与任务</td></tr>
+          <tr><td>开发 Agent</td><td>按任务步骤编写/修改代码</td></tr>
+          <tr><td>测试设计 Agent</td><td>根据已实现代码生成 API + Web 用例</td></tr>
+          <tr><td>测试执行 Agent</td><td>运行 API / Playwright UI 测试</td></tr>
+          <tr><td>修复 Agent</td><td>读取失败明细，自动改代码</td></tr>
+          <tr><td>部署 Agent</td><td>构建、上传、启动、配置 Nginx</td></tr>
+          <tr><td>基础架构校验 Agent</td><td>验证基础设施模块可构建启动</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 6: 任务拆解与上下文传递 -->
+      <section>
+        <h2>任务拆解与上下文传递：结构化状态机驱动协同</h2>
+        <ul>
+          <li><strong>三层拆解：</strong>ExecutionPlan → Module → Task → Step</li>
+          <li><strong>依赖编排：</strong>`sequence_number` + `blocked_by`，业务模块严格串行过质量门禁</li>
+          <li><strong>上下文载体：</strong>数据库状态表 + 文件系统产物 + 提示词注入</li>
+          <li><strong>状态流转：</strong>待执行 → 执行中 → 待测试 → 测试中 → 完成 / 测试失败 / 失败</li>
+        </ul>
+      </section>
+
+      <!-- Slide 7: Skill 工程体系 -->
+      <section>
+        <h2>Skill 工程体系：契约维度覆盖评审核验点</h2>
+        <table>
+          <tr><th>契约维度</th><th>定义 / 核验点</th></tr>
+          <tr><td>输入输出</td><td>Inputs / Outputs 明确，8 个 Skill 均有</td></tr>
+          <tr><td>调用条件</td><td>何时可被 Agent 调用（如业务模块任务完成后）</td></tr>
+          <tr><td>依赖工具</td><td>Claude CLI / SSH / Playwright / Shell / Nginx 等</td></tr>
+          <tr><td>失败处理</td><td>快速失败 / 降级自由测试 / 修复循环 / 熔断</td></tr>
+          <tr><td>验证方式</td><td>自动测试门禁 / JSON Schema 校验 / 构建启动校验</td></tr>
+          <tr><td>复用价值</td><td>跨项目复用模板、Schema 与执行证据格式</td></tr>
+          <tr><td>版本演进</td><td>语义化版本 v1.0，变更记入 changelog，向后兼容</td></tr>
+          <tr><td>开源分发设计</td><td>Schema + 提示词模板 + 部署脚本分发，Apache-2.0</td></tr>
+        </table>
+        <small>已落地：internal/engine/skill 注册表 + /projects/:id/available-skills API + 单测校验契约完整性</small>
+      </section>
+
+      <!-- Slide 8: MCP 与工具集成 -->
+      <section>
+        <h2>MCP 与工具集成：等价契约 + 平滑迁移路径</h2>
+        <ul>
+          <li>当前工具：SSHDeployTool、PlaywrightTool、APIScriptTool、GitTool、NginxTool</li>
+          <li>等价契约已明确：调用入口、Schema、鉴权、重试、幂等、审计、降级</li>
+          <li>迁移到 MCP：将每个工具封装为独立 MCP Server</li>
+          <li>优势：当前设计已完成 Schema 与审计，迁移只需协议适配，无需重写调用链</li>
+        </ul>
+      </section>
+
+      <!-- Slide 9: 自动测试门禁 -->
+      <section>
+        <h2>核心闭环：业务模块自动测试门禁（最多 3 轮）</h2>
+        <ol>
+          <li>第 0 步：测试设计 Agent 生成 API / Playwright 用例（幂等）</li>
+          <li>第 1-3 轮：部署 Agent 全量部署 → 测试 Agent 执行用例</li>
+          <li>失败 → 修复 Agent 读取失败明细改代码 → 回到第 2 步</li>
+          <li>通过 → 模块置为完成，继续下一模块</li>
+          <li>3 轮耗尽 → 流水线暂停，人工确认后断点续跑</li>
+        </ol>
+      </section>
+
+      <!-- Slide 10: 可观测、审计与断点续跑 -->
+      <section>
+        <h2>可观测、审计与断点续跑：从 Demo 到 Production</h2>
+        <ul>
+          <li><strong>Trace：</strong>`claude_call_records` 记录每次 Agent 调用的 prompt/output/exit_code/session</li>
+          <li><strong>Log：</strong>SSE/WebSocket 实时推送 + `app.log` / `backend.log`</li>
+          <li><strong>Metrics：</strong>`test_run` 统计通过率/轮次/耗时；部署表统计成功率</li>
+          <li><strong>证据：</strong>Playwright 终态/失败截图、部署记录、测试 JSON</li>
+          <li><strong>断点续跑：</strong>基于状态机，重启流水线时自动从最近完成点恢复</li>
+        </ul>
+      </section>
+
+      <!-- Slide 11: 安全边界与风险控制 -->
+      <section>
+        <h2>安全边界与风险控制：高风险动作可审计、可暂停</h2>
+        <ul>
+          <li>敏感凭证：SSH Key、数据库密码、JWT Secret 由服务层注入，不交给 Agent</li>
+          <li>部署安全：`force` 参数显式控制覆盖式重部署</li>
+          <li>失败熔断：基础架构模块失败立即终止；业务模块失败进入自动修复循环</li>
+          <li>人工兜底：自动测试 3 轮耗尽后暂停；UI 提供“标记完成”跳过异常</li>
+          <li>审计：所有 Agent 调用、工具执行、状态变更持久化到数据库</li>
+        </ul>
+      </section>
+
+      <!-- Slide 12: 工程落地可行性 -->
+      <section>
+        <h2>工程落地可行性：技术栈与运行状态</h2>
+        <ul>
+          <li>后端：Go 1.21 + Gin + GORM + MySQL（约 1.95 万行 Go 代码）</li>
+          <li>前端：Vue 3 + TypeScript + Element Plus + Vite</li>
+          <li>Agent 执行层：Claude Code CLI（--print 离线模式）</li>
+          <li>部署：本地构建 + tar 流上传远程服务器 + Nginx 反向代理</li>
+          <li>当前状态：已实现全链路自动化，完成多个 Demo 端到端交付</li>
+        </ul>
+      </section>
+
+      <!-- Slide 13: 当前进展与验证证据 -->
+      <section>
+        <h2>当前进展与验证证据：137 次提交，质量闭环已跑通</h2>
+        <ul>
+          <li>自动用例生成：API + Playwright 场景由测试设计 Agent 自动生成并落库</li>
+          <li>场景级执行：按名匹配回写模块用例，前端展示通过/失败与截图</li>
+          <li>失败自动修复：开发 Agent 读取失败明细，修复后重部署重测</li>
+          <li>截图与报告：终态图、错误图、JSON 结果报告、`integration-test-report.html`</li>
+          <li>断点续跑：历史空用例模块重启自动补生成，失败模块修复后可恢复</li>
+        </ul>
+      </section>
+
+      <!-- Slide 14: 开放与开源计划 -->
+      <section>
+        <h2>开放与开源计划：从内部平台到可复用 Agent Infra</h2>
+        <ul>
+          <li>开源 Skill 契约：Agent Identity 模板、输入输出 Schema、失败处理规范</li>
+          <li>开源运行证据格式：测试结果 JSON、截图命名规范、调用记录结构</li>
+          <li>贡献 MCP Server：将部署、测试、Git、Nginx 工具封装为标准 MCP Server</li>
+          <li>社区场景：支持更多技术栈（Python/Java）、更多测试框架、CI/CD 集成</li>
+          <li>许可证：计划采用 Apache 2.0 或 MIT</li>
+        </ul>
+      </section>
+
+      <!-- Slide 15: 总结 -->
+      <section class="center">
+        <h2>总结：Loafer = 软件研发领域的 Agent Infra 实践</h2>
+        <ul style="list-style: none; padding-left: 0;">
+          <li>✅ 以 AgentTeams Manager-Worker 为设计基点，8 个 Agent 完成端到端交付</li>
+          <li>✅ Skill 抽象 + 等价 MCP 契约，兼顾当前落地与未来生态兼容</li>
+          <li>✅ 自动测试门禁、可观测、审计、断点续跑，具备 Production 潜力</li>
+          <li>✅ 已验证可行，计划开源，目标成为企业软件交付的多 Agent 基座</li>
+        </ul>
+      </section>
+
+      <!-- Slide 16: 附录（可选） -->
+      <section>
+        <h2>附录：与评分标准对照</h2>
+        <table>
+          <tr><th>评分维度</th><th>权重</th><th>Loafer 对应内容</th></tr>
+          <tr><td>场景价值与行业可复制性</td><td>25%</td><td>软件研发全流程自动化，Go+Vue 业务系统快速构建</td></tr>
+          <tr><td>多 Agent 协同与自主闭环能力</td><td>25%</td><td>Manager-Worker 架构、状态机、上下文传递、审批与回滚</td></tr>
+          <tr><td>Skill 工程体系与生态复用</td><td>25%</td><td>8 大 Skill 清单、输入输出契约、MCP 迁移路径</td></tr>
+          <tr><td>工程落地、运行验证与安全可审计</td><td>20%</td><td>已运行 Demo、测试门禁、截图证据、调用记录、部署日志</td></tr>
+          <tr><td>开放/开源贡献</td><td>5%</td><td>计划开源 Skill 契约、运行证据格式、MCP Server</td></tr>
+        </table>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      showSlideNumber: 'all',
+      transition: 'slide',
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      center: false
+    });
+  </script>
+</body>
+</html>

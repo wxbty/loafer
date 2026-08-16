@@ -1,0 +1,62 @@
+# Go
+backend-go/loafer-agent
+backend-go/loafer-agent.exe
+backend-go/loafer-agent.new
+backend-go/app.log
+
+# Backup files (never commit)
+*.bak
+*.bak.*
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+# Cursor（编辑器本地配置、skills、MCP 等，不入库）
+.cursor/
+# Claude Code（本地配置、agents、settings 等，不入库）
+.claude/
+# 仓库根目录下的 skill 副本（与 .cursor/skills 等重复，不入库）
+/skill/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log
+logs/
+*.log
+
+# Temp
+*.tmp
+*.temp
+tmp/
+
+# Config
+*.properties
+*.yml
+*.yaml
+
+# Secrets（含密码、私钥等敏感信息，禁止入库）
+backend-go/.env
+backend-go/loafer_rsa.pem
+*.pem
+*.key
+
+# Trae 临时产物
+.trae-html-share-packages/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Database
+*.sql
+deploy-with-bak-db.sh
+loafer-agent

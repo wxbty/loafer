@@ -1,0 +1,8 @@
+* text=auto
+
+# 环境配置文件明确按文本处理，确保可预览/编辑
+.env text
+.env.* text
+
+# Shell 脚本必须以 LF 结尾，否则在 Linux/macOS 上 bash 会因 \r 报错
+*.sh text eol=lf
